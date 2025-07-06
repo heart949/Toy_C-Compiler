@@ -1,0 +1,6 @@
+# dune init project ToyC_Compiler
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/gx/.cache/dune/db
+# Workspace root: /home/gx/ToyC_Compiler/ToyC_Compiler
+# Auto-detected concurrency: 20
