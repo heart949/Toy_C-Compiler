@@ -1,0 +1,4 @@
+(executable
+ (public_name toyc_compiler)
+ (name main)
+ (libraries toyc_compiler))

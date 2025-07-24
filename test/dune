@@ -1,0 +1,11 @@
+; test/dune
+; 测试用例依赖 toyc_compiler 库和 ounit2，确保可以 open Toyc_compiler_Ast 等模块
+
+(test
+ (name test_toyc_compiler)
+ (libraries toyc_compiler ounit2))
+
+(executable
+ (public_name test_codegen)
+ (name test_codegen)
+ (libraries toyc_compiler))

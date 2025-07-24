@@ -1,0 +1,33 @@
+    .text
+    .globl main
+    # ToyC Compiler Generated Code
+print:
+    # Function: print
+    # prologue
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw fp, 8(sp)
+    addi fp, sp, 16
+    li t0, 1
+    sw t0, -4(fp)
+    lw t1, -4(fp)
+    li t2, 1
+    add t3, t1, t2
+    sw t3, -4(fp)
+    lw ra, 12(sp)
+    lw fp, 8(sp)
+    addi sp, sp, 16
+    ret
+main:
+    # Function: main
+    # prologue
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw fp, 8(sp)
+    addi fp, sp, 16
+    jal ra, print
+    li a0, 0
+    lw ra, 12(sp)
+    lw fp, 8(sp)
+    addi sp, sp, 16
+    ret
