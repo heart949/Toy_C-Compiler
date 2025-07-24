@@ -1,6 +1,7 @@
-(lang dune 3.19)
+(lang dune 3.17)
+(using menhir 3.0)
 
-(name ToyC_Compiler)
+(name toyc_compiler)
 
 (generate_opam_files true)
 
@@ -16,10 +17,10 @@
 (documentation https://url/to/documentation)
 
 (package
- (name ToyC_Compiler)
+ (name toyc_compiler)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml)
+ (depends ocaml dune menhir)
  (tags
   ("add topics" "to describe" your project)))
 

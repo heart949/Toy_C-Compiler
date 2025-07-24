@@ -1,83 +1,66 @@
 {
-open Parser  (* Import token types from parser *)
-open Lexing  (* For position handling *)
-
-(* Reserved keywords mapping *)
-let reserved = [
-  ("int", INT);
-  ("void", VOID);
-  ("if", IF);
-  ("else", ELSE);
-  ("while", WHILE);
-  ("break", BREAK);
-  ("continue", CONTINUE);
-  ("return", RETURN);
-]
-
-
+(*
+  OCaml 头代码部分。
+  我们需要打开 Parser 模块，这样才能使用其中定义的 token 类型 (如 IF, PLUS, ID 等)。
+*)
+open Parser
 }
 
-(* Regular expression definitions *)
+(* 定义一些常用的正则表达式别名 *)
 let digit = ['0'-'9']
-let nondigit = ['a'-'z' 'A'-'Z' '_']
-let ident = nondigit (nondigit | digit)*
-let integer = '-'? ( '0' | ['1'-'9'] digit* )
-let whitespace = [' ' '\t' '\r']
+let letter = ['a'-'z' 'A'-'Z']
+let ident = (letter | '_') (letter | digit | '_')*
 
-rule token = parse
-  | whitespace+    { token lexbuf }  (* Skip whitespace *)
-  | '\n'           { new_line lexbuf; token lexbuf } (* Count lines *)
-  
-  (* Comments *)
-  | "//" [^ '\n']* { token lexbuf }  (* 单行 *)
-  | "/*"           { comment lexbuf } (* 多行 *)
-  
-  (* Identifiers and keywords *)
-  | ident as id    { 
-      try List.assoc id reserved 
-      with Not_found -> ID id 
-    }
-  
-  (* Integer literals *)
-  | integer as n   { NUMBER (int_of_string n) }
-  
-  (* Operators *)
-  | "=="   { EQ }
-  | "!="   { NEQ }
-  | "<="   { LE }
-  | ">="   { GE }
-  | '<'    { LT }
-  | '>'    { GT }
-  | "&&"   { LAND }
-  | "||"   { LOR }
-  | '='    { ASSIGN }
-  | '+'    { PLUS }
-  | '-'    { MINUS }
-  | '*'    { TIMES }
-  | '/'    { DIV }
-  | '%'    { MOD }
-  | '!'    { NOT }
-  
-  (* Punctuation *)
-  | ';'    { SEMI }
-  | ','    { COMMA }
-  | '('    { LPAREN }
-  | ')'    { RPAREN }
-  | '{'    { LBRACE }
-  | '}'    { RBRACE }
-  
-  (* End of file *)
-  | eof    { EOF }
-  
-  (* Invalid character *)
-  | _ as c  {
-      let pos = lexbuf.lex_curr_p in
-      failwith (Printf.sprintf "Illegal character '%c' at line %d, column %d"
-        c pos.pos_lnum (pos.pos_cnum - pos.pos_bol)) }
+rule tokenize = parse
+  (* 规则的顺序很重要，ocamllex 会选择第一个匹配的规则 *)
 
-(* Comment handling rule *)
+  | [' ' '\t' '\r' '\n']  { tokenize lexbuf }     (* 1. 忽略空白字符 *)
+  | "/*"                  { comment lexbuf }      (* 2. 匹配多行注释 *)
+  | "//" [^ '\n']* { tokenize lexbuf }     (* 3. 匹配单行注释 *)
+
+  (* 4. 关键字 *)
+  | "if"        { IF }
+  | "else"      { ELSE }
+  | "while"     { WHILE }
+  | "break"     { BREAK }
+  | "continue"  { CONTINUE }
+  | "return"    { RETURN }
+  | "int"       { INT }
+  | "void"      { VOID }
+
+  (* 5. 标识符: 必须放在关键字之后 *)
+  | ident as id { ID id }
+
+  (* 6. 整数常量 *)
+  | digit+ as n { NUMBER (int_of_string n) }
+
+  (* 7. 运算符和分隔符 *)
+  | "+"         { PLUS }
+  | "-"         { MINUS }
+  | "*"         { STAR }
+  | "/"         { SLASH }
+  | "%"         { MOD }
+  | "=="        { EQ }
+  | "!="        { NEQ }
+  | "<"         { LT }
+  | "<="        { LEQ }
+  | ">"         { GT }
+  | ">="        { GEQ }
+  | "&&"        { AND }
+  | "||"        { OR }
+  | "!"         { NOT }
+  | "="         { ASSIGN }
+  | ";"         { SEMI }
+  | ","         { COMMA }
+  | "("         { LPAREN }
+  | ")"         { RPAREN }
+  | "{"         { LBRACE }
+  | "}"         { RBRACE }
+
+  (* 8. 文件结束符 *)
+  | eof         { EOF }
+
+(* C 风格的多行注释处理 *)
 and comment = parse
-  | "*/"   { token lexbuf }        (* End of comment *)
-  | '\n'   { new_line lexbuf; comment lexbuf }  (* Count lines in comments *)
-  | _      { comment lexbuf }      (* Any other char in comment *)
-  | eof    { failwith "Unterminated comment" }
+  | "*/" { tokenize lexbuf }
+  | _    { comment lexbuf }

@@ -1,4 +1,4 @@
 (executable
- (public_name ToyC_Compiler)
+ (public_name toyc_compiler)
  (name main)
- (libraries ToyC_Compiler))
+ (libraries toyc_compiler))
